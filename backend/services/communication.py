@@ -16,10 +16,8 @@ class CommunicationService:
         self.vonage_client = None
         if settings.VONAGE_API_KEY and settings.VONAGE_API_SECRET:
             from vonage import Vonage, Auth
-            from vonage_sms import SmsMessage
             self.vonage_auth = Auth(api_key=settings.VONAGE_API_KEY, api_secret=settings.VONAGE_API_SECRET)
             self.vonage_client = Vonage(self.vonage_auth)
-            self.SmsMessage = SmsMessage
 
     async def send_email(self, to_email: str, subject: str, content: str, from_name: str = "CareOps"):
         """Send an email using Mailjet"""
@@ -68,17 +66,16 @@ class CommunicationService:
             
         try:
             # Vonage requires numbers in E.164 format
-            message = self.SmsMessage(
-                to=to_phone.replace('+', '').replace(' ', ''),
-                sender=from_name,
-                text=content
-            )
+            response = self.vonage_client.sms.send_message({
+                "from": from_name,
+                "to": to_phone.replace('+', '').replace(' ', ''),
+                "text": content,
+            })
 
-            response = self.vonage_client.sms.send(message)
-
-            if response:
+            if response["messages"][0]["status"] == "0":
                 return True
             else:
+                print(f"ERROR: Vonage Error: {response['messages'][0]['error-text']}")
                 return False
         except Exception as e:
             print(f"ERROR: Failed to send SMS: {str(e)}")

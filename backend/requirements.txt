@@ -11,5 +11,4 @@ groq==0.13.0
 httpx==0.27.2
 email-validator==2.2.0
 mailjet-rest==1.3.4
-vonage==3.11.0
-vonage-sms==1.1.0
+vonage>=4.1.0
