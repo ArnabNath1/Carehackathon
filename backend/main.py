@@ -19,9 +19,19 @@ async def add_process_time_header(request, call_next):
     return response
 
 # CORS Configuration
+origins = []
+if isinstance(settings.CORS_ORIGINS, list):
+    origins = settings.CORS_ORIGINS
+elif isinstance(settings.CORS_ORIGINS, str):
+    # Handle comma-separated string if provided instead of JSON list
+    origins = [o.strip() for o in settings.CORS_ORIGINS.split(",")]
+
+# Add local defaults
+origins = list(set(origins + ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"]))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS + ["http://localhost:3001", "http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
